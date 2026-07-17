@@ -16,8 +16,12 @@ var enrollment = await enrollmentService.GetByIdAsync(courseId,
 id, ct);
 return enrollment is not null ? Ok(enrollment) : NotFound();
 }
-public async Task<IActionResult> EnrollStudent(int courseId, EnrollStudentRequest request, CancellationToken ct)
+public async Task<IActionResult> GetEnrollments(int courseId, CancellationToken ct)
 {
+// TODO 4: Confirm the parent course exists (courseService.GetByIdAsync); 404 if not.
+//
+//Then return Ok(await enrollmentService.GetByCourseAsync(courseId, ct))
+//onseDto>.where GetByCourseAsync projects to a List<EnrollmentResp
 throw new NotImplementedException();
 }
 }

@@ -8,10 +8,69 @@ using TmsApi.Data;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using TmsApi.Entities;
+using Scalar.AspNetCore;
 using Tms.Api.Persistence;
+using Tms.Api.Filters;
+using Asp.Versioning;
+using TmsApi.Middleware;
+
+
+
+
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.MapControllers();
+
+app.Run();
+
+builder.Services.AddOpenApi("v1", options =>
+{
+options.ShouldInclude = description =>
+description.GroupName == "v1";
+});
+builder.Services.AddOpenApi("v2", options =>
+{
+options.ShouldInclude = description =>
+description.GroupName == "v2";
+});
+builder.Services.AddApiVersioning(options =>
+{
+options.DefaultApiVersion = new ApiVersion(1, 0);
+options.AssumeDefaultVersionWhenUnspecified = true;
+options.ReportApiVersions = true;
+options.ApiVersionReader = new UrlSegmentApiVersionReader();
+})
+.AddApiExplorer(options =>
+{
+options.GroupNameFormat = "'v'VVV";
+options.SubstituteApiVersionInUrl = true;
+});
+    app.UseMiddleware<V1DeprecationMiddleware>();
+
+    app.MapScalarApiReference(options =>
+{
+options.WithTitle("TMS API Reference")
+.WithTheme(ScalarTheme.DeepSpace)
+.WithDefaultHttpClient(ScalarTarget.CSharp,
+ScalarClient.HttpClient);
+// Tell Scalar to pull both documents into its sidebar dropdown
+options
+.AddDocument("v1", "API Version 1.0")
+.AddDocument("v2", "API Version 2.0");
+});
+
+
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<TmsDbContext>(options =>
@@ -106,5 +165,9 @@ using var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<TmsDbContext>();
 await DataSeeder.SeedAsync(context);
 }
+builder.Services.AddControllers(options =>
+{
+options.Filters.Add<AuditLogFilter>();
+});
 
 app.Run();}

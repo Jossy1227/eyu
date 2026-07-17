@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+/*using Microsoft.AspNetCore.Mvc;
 using TmsApi.Entities;
 using Tms.Api.Services;
 namespace Tms.Api.Controllers;
@@ -6,7 +6,7 @@ using Tms.Api.Dtos;
 
 
 
-[ApiController]
+/*[ApiController]
 [Route("api/courses")]
 public class CoursesController(ICourseService courseService) : ControllerBase
 {
@@ -36,4 +36,16 @@ public async Task<IActionResult> GetCourses(
         var result = await courseService.GetCoursesAsync(request, ct);
 return Ok(result);
     }
+}*/
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Tms.Api.Dtos;
+using Tms.Api.Services;
+namespace Tms.Api.Controllers;
+[ApiController]
+[Route("api/courses")]
+public class CoursesController(
+ICourseService courseService,
+LinkGenerator linkGenerator) : ControllerBase
+{
 }
